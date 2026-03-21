@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI Resume Optimizer — AnchorWithin</title>
+<meta name="description" content="Paste your resume and get instant AI-powered optimization, scoring, and modern formatting. Free tool by AnchorWithin.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090C;--s:#101219;--s2:#171B26;--s3:#1E2333;
+  --b:rgba(255,255,255,.05);--ba:rgba(86,165,255,.15);
+  --blue:#56A5FF;--blue-b:#7CBCFF;--blue-d:#2D5A99;--blue-g:rgba(86,165,255,.08);
+  --cyan:#5DE8D4;--cyan-g:rgba(93,232,212,.08);
+  --red:#FF6B6B;--red-g:rgba(255,107,107,.08);
+  --amber:#F0C040;--amber-g:rgba(240,192,64,.08);
+  --green:#6EE7A0;--green-g:rgba(110,231,160,.08);
+  --t:#E6E4DF;--t2:#9A978F;--t3:#585650;
+  --fd:'Bricolage Grotesque',system-ui,sans-serif;
+  --fb:'Crimson Pro',Georgia,serif;
+  --r:14px;--rs:10px;--rx:6px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--fd);background:var(--bg);color:var(--t);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(86,165,255,.03),transparent);pointer-events:none;z-index:0}
+
+.hdr{text-align:center;padding:34px 20px 10px;position:relative;z-index:2}
+.hdr-br{font-size:.62rem;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:var(--blue);margin-bottom:12px;opacity:0;animation:u .6s .1s ease both}
+.hdr h1{font-size:clamp(1.7rem,6vw,2.5rem);font-weight:800;color:var(--t);line-height:1.1;letter-spacing:-.5px;opacity:0;animation:u .6s .18s ease both}
+.hdr h1 .ac{color:var(--blue)}
+.hdr .tg{margin-top:6px;font-family:var(--fb);font-size:.95rem;font-weight:300;font-style:italic;color:var(--t2);opacity:0;animation:u .6s .3s ease both}
+@keyframes u{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.w{max-width:540px;margin:0 auto;padding:8px 16px 100px;position:relative;z-index:2}
+.cd{background:var(--s);border:1px solid var(--b);border-radius:var(--r);padding:20px 18px;margin-bottom:12px;opacity:0;animation:u .5s ease both}
+.cd.d1{animation-delay:.35s}.cd.d2{animation-delay:.42s}.cd.d3{animation-delay:.5s}
+
+.cl{font-size:.65rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--t3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.cl::after{content:'';flex:1;height:1px;background:var(--b)}
+
+textarea,input[type="text"],select{
+  width:100%;padding:13px 14px;background:var(--s2);border:1px solid var(--b);border-radius:var(--rs);
+  color:var(--t);font-family:var(--fb);font-size:.92rem;font-weight:400;outline:none;
+  transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;line-height:1.55;
+}
+textarea{resize:vertical;min-height:180px}
+textarea:focus,input:focus,select:focus{border-color:var(--blue-d);box-shadow:0 0 0 3px var(--blue-g)}
+textarea::placeholder,input::placeholder{color:var(--t3)}
+select{cursor:pointer;font-family:var(--fd)}
+select option{background:var(--s2);color:var(--t)}
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:.76rem;font-weight:600;color:var(--t2);margin-bottom:6px}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 28px;border:none;border-radius:var(--rs);
+  font-family:var(--fd);font-size:.88rem;font-weight:700;
+  cursor:pointer;transition:all .2s;text-decoration:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn-blue{background:var(--blue);color:var(--bg)}
+.btn-blue:hover{background:var(--blue-b);transform:translateY(-1px);box-shadow:0 8px 30px rgba(86,165,255,.2)}
+.btn-ghost{background:transparent;border:1px solid var(--blue-d);color:var(--blue)}
+.btn-ghost:hover{background:var(--blue-g)}
+.btn-wide{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+
+/* ── Score Ring ── */
+.score-wrap{display:none;text-align:center;margin-bottom:16px}
+.score-wrap.show{display:block}
+.score-row{display:flex;align-items:center;justify-content:center;gap:20px}
+.score-ring{position:relative;width:90px;height:90px}
+.score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-ring .trk{fill:none;stroke:var(--s2);stroke-width:5}
+.score-ring .prg{fill:none;stroke:var(--blue);stroke-width:5;stroke-linecap:round;stroke-dasharray:251;stroke-dashoffset:251;transition:stroke-dashoffset 1.2s ease}
+.score-ring .prg.good{stroke:var(--green)}
+.score-ring .prg.mid{stroke:var(--amber)}
+.score-ring .prg.low{stroke:var(--red)}
+.score-val{position:absolute;inset:0;display:grid;place-items:center;font-size:1.6rem;font-weight:800;color:var(--t)}
+.score-info{text-align:left}
+.score-info .grade{font-size:1.3rem;font-weight:800;line-height:1.2}
+.score-info .grade.good{color:var(--green)}.score-info .grade.mid{color:var(--amber)}.score-info .grade.low{color:var(--red)}
+.score-info .gtext{font-size:.78rem;color:var(--t2);margin-top:2px;font-weight:400}
+
+/* ── Issues List ── */
+.issues{margin-top:14px}
+.issue{display:flex;gap:10px;padding:10px 12px;border-radius:var(--rx);margin-bottom:4px;font-size:.84rem;line-height:1.5}
+.issue.fix{background:var(--red-g);color:var(--red)}
+.issue.warn{background:var(--amber-g);color:var(--amber)}
+.issue.ok{background:var(--green-g);color:var(--green)}
+.issue .ico{flex-shrink:0;margin-top:2px}
+
+/* ── Optimized Resume Output ── */
+.resume-out{
+  display:none;margin-bottom:12px;
+  background:var(--s);border:1px solid var(--ba);
+  border-radius:var(--r);overflow:hidden;
+}
+.resume-out.show{display:block}
+.resume-header{padding:20px 18px;border-bottom:1px solid var(--b)}
+.resume-header .rname{font-size:1.4rem;font-weight:800;color:var(--t);letter-spacing:-.3px}
+.resume-header .rmeta{font-size:.82rem;color:var(--t2);margin-top:4px;font-weight:400}
+.resume-section{padding:16px 18px;border-bottom:1px solid var(--b)}
+.resume-section:last-child{border:none}
+.resume-section .stitle{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.resume-section .stext{font-family:var(--fb);font-size:.9rem;color:var(--t);line-height:1.7;white-space:pre-wrap}
+.resume-section .stext strong{color:var(--t);font-weight:600}
+
+.resume-actions{display:flex;gap:8px;padding:14px 18px}
+.resume-actions .btn{flex:1;font-size:.82rem;padding:10px 14px}
+
+/* ── Premium Gate ── */
+.gate{position:relative;border-radius:var(--r);overflow:hidden;margin-bottom:12px;opacity:0;animation:u .5s .6s ease both}
+.gate-lock{
+  position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:28px;
+  background:rgba(8,9,12,.88);backdrop-filter:blur(10px);
+  transition:opacity .4s,visibility .4s;
+}
+.gate.open .gate-lock{opacity:0;visibility:hidden;pointer-events:none}
+.gbadge{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
+  background:rgba(86,165,255,.06);border:1px solid rgba(86,165,255,.15);
+  border-radius:50px;font-size:.68rem;font-weight:700;color:var(--blue);
+  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;
+}
+.gate-lock h3{font-size:1.2rem;font-weight:800;color:var(--t);margin-bottom:6px}
+.gate-lock p{font-size:.8rem;color:var(--t2);max-width:300px;margin-bottom:16px;line-height:1.55;font-weight:400}
+.gate-lock .pn{font-size:.68rem;color:var(--t3);margin-top:8px}
+.gate-content{background:var(--s);border:1px solid var(--ba);border-radius:var(--r);padding:22px 18px;filter:blur(4px);transition:filter .4s}
+.gate.open .gate-content{filter:none}
+
+/* ── AI Skills Cards ── */
+.skill-card{background:var(--s2);border:1px solid var(--b);border-radius:var(--rs);padding:16px;margin-bottom:10px;transition:border-color .2s}
+.skill-card:hover{border-color:var(--ba)}
+.skill-card .sk-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.skill-card .sk-icon{font-size:1.3rem}
+.skill-card .sk-name{font-size:.95rem;font-weight:700;color:var(--t)}
+.skill-card .sk-demand{font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:50px;margin-left:auto}
+.sk-demand.hot{background:var(--red-g);color:var(--red)}
+.sk-demand.high{background:var(--amber-g);color:var(--amber)}
+.sk-demand.rising{background:var(--cyan-g);color:var(--cyan)}
+.skill-card .sk-desc{font-size:.82rem;color:var(--t2);line-height:1.55;margin-bottom:8px}
+.skill-card .sk-line{font-family:var(--fb);font-size:.84rem;font-style:italic;color:var(--blue);line-height:1.5;padding:10px;background:var(--blue-g);border-radius:var(--rx);border-left:3px solid var(--blue-d)}
+
+.futurelink{display:block;margin-top:10px;font-size:.78rem;color:var(--t3);text-align:center;font-style:italic}
+
+/* ── Support ── */
+.sup{text-align:center;padding:24px 16px 0;opacity:0;animation:u .5s .7s ease both}
+.sup .sep{width:32px;height:2px;background:var(--blue-d);margin:0 auto 18px;border-radius:2px}
+.sup p{font-size:.76rem;color:var(--t3);margin-bottom:12px;font-weight:400;line-height:1.6}
+.sup a.sl{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 24px;
+  background:linear-gradient(135deg,#FF6B6B,#C850C0);color:#fff;text-decoration:none;
+  border-radius:50px;font-weight:700;font-size:.82rem;transition:transform .2s,box-shadow .2s;
+}
+.sup a.sl:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(200,80,192,.2)}
+
+.legal{text-align:center;padding:24px 16px 40px;font-size:.65rem;color:var(--t3);line-height:1.7}
+.legal a{color:var(--blue-d);text-decoration:none}
+
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--b);border-top-color:var(--blue);border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media(max-width:380px){.score-ring{width:70px;height:70px}.score-val{font-size:1.3rem}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-br">AnchorWithin</div>
+  <h1>Resume <span class="ac">Optimizer</span></h1>
+  <p class="tg">AI-powered analysis, scoring &amp; rewriting</p>
+</div>
+
+<div class="w">
+
+  <div class="cd d1">
+    <div class="cl">Paste Your Resume</div>
+    <div class="field">
+      <textarea id="resumeIn" placeholder="Paste your current resume text here...&#10;&#10;Include your name, experience, skills, education — everything you have."></textarea>
+    </div>
+    <div class="field">
+      <label>Target Role (optional)</label>
+      <input type="text" id="targetRole" placeholder="e.g. Marketing Manager, Software Engineer, Data Analyst">
+    </div>
+    <div class="field">
+      <label>Experience Level</label>
+      <select id="expLevel">
+        <option value="entry">Entry Level (0-2 years)</option>
+        <option value="mid" selected>Mid Level (3-7 years)</option>
+        <option value="senior">Senior (8+ years)</option>
+        <option value="exec">Executive / Leadership</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="cd d2">
+    <button class="btn btn-blue btn-wide" id="analyzeBtn" onclick="analyze()">&#9889;&ensp;Analyze &amp; Optimize</button>
+  </div>
+
+  <!-- ═══ SCORE ═══ -->
+  <div class="score-wrap" id="scoreWrap">
+    <div class="cd" style="opacity:1;animation:none">
+      <div class="cl">Resume Score</div>
+      <div class="score-row">
+        <div class="score-ring">
+          <svg viewBox="0 0 90 90"><circle class="trk" cx="45" cy="45" r="40"/><circle class="prg" id="scoreRing" cx="45" cy="45" r="40"/></svg>
+          <div class="score-val" id="scoreVal">0</div>
+        </div>
+        <div class="score-info">
+          <div class="grade" id="gradeText">—</div>
+          <div class="gtext" id="gradeDesc">Analyzing...</div>
+        </div>
+      </div>
+      <div class="issues" id="issuesList"></div>
+    </div>
+  </div>
+
+  <!-- ═══ OPTIMIZED RESUME ═══ -->
+  <div class="resume-out" id="resumeOut">
+    <div class="resume-header">
+      <div class="rname" id="rName">Your Name</div>
+      <div class="rmeta" id="rMeta"></div>
+    </div>
+    <div id="resumeSections"></div>
+    <div class="resume-actions">
+      <button class="btn btn-ghost" onclick="copyResume()">&#128203; Copy Text</button>
+      <button class="btn btn-ghost" onclick="printResume()">&#128424; Print / PDF</button>
+    </div>
+  </div>
+
+  <!-- ═══ PREMIUM: AI SKILLS ═══ -->
+  <div class="gate" id="proGate">
+    <div class="gate-lock">
+      <div class="gbadge">&#9889; Pro Upgrade</div>
+      <h3>AI Skills Advisor</h3>
+      <p>Get 5 high-demand AI skills to add to your resume, with exact resume lines and learning paths.</p>
+      <button class="btn btn-blue" onclick="unlockPro()">Unlock for $4.99</button>
+      <div class="pn">One-time &middot; Future tools included free</div>
+    </div>
+    <div class="gate-content" id="proContent">
+      <div class="cl">AI Skills to Add</div>
+      <p style="font-size:.84rem;color:var(--t2);margin-bottom:14px">Analyze your resume first to get personalized AI skill recommendations.</p>
+    </div>
+  </div>
+
+  <div class="sup">
+    <div class="sep"></div>
+    <p>Free career tools from AnchorWithin.<br>If this helped your job search, consider supporting the mission.</p>
+    <a href="https://ko-fi.com/anchorwithin" target="_blank" rel="noopener" class="sl">&#9749; Support AnchorWithin</a>
+  </div>
+
+  <div class="legal">
+    &copy; 2026 AnchorWithin LLC &bull; For career guidance purposes only.<br>
+    <a href="https://youtube.com/@AnchorWithin">YouTube</a> &middot;
+    <a href="https://ko-fi.com/anchorwithin">Ko-fi</a> &middot;
+    <a href="https://gumroad.com/anchorwithin">Gumroad</a>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   ANALYSIS ENGINE
+   ═══════════════════════════════════════ */
+const WEAK_VERBS = ['helped','assisted','worked','did','made','was responsible for','handled','dealt with','involved in','participated in','tasked with','in charge of'];
+const STRONG_VERBS = ['Led','Spearheaded','Engineered','Optimized','Launched','Delivered','Increased','Reduced','Architected','Transformed','Negotiated','Streamlined','Designed','Implemented','Generated','Secured','Established','Automated','Accelerated','Mentored'];
+const POWER_WORDS = ['revenue','growth','roi','increased','decreased','saved','managed','budget','team','clients','strategy','analytics','data','kpi','metrics','performance','efficiency'];
+const SECTION_KEYWORDS = {summary:['summary','objective','about','profile','overview'],experience:['experience','work','employment','history','career'],education:['education','degree','university','college','school','certification'],skills:['skills','tools','technologies','proficiencies','competencies']};
+
+function analyze(){
+  const raw = document.getElementById('resumeIn').value.trim();
+  if(!raw||raw.length<50){
+    document.getElementById('resumeIn').focus();
+    document.getElementById('resumeIn').setAttribute('placeholder','Please paste your full resume text here (minimum 50 characters)...');
+    return;
+  }
+  const btn = document.getElementById('analyzeBtn');
+  btn.innerHTML='<span class="spin"></span> Analyzing resume\u2026';
+  btn.disabled=true;
+
+  setTimeout(()=>{
+    const result = runAnalysis(raw);
+    renderScore(result);
+    renderOptimized(raw, result);
+    renderProSkills(result);
+
+    document.getElementById('scoreWrap').classList.add('show');
+    document.getElementById('resumeOut').classList.add('show');
+    document.getElementById('scoreWrap').scrollIntoView({behavior:'smooth',block:'start'});
+
+    btn.innerHTML='&#9889;&ensp;Re-Analyze';
+    btn.disabled=false;
+  },1800);
+}
+
+function runAnalysis(text){
+  const lower = text.toLowerCase();
+  const words = text.split(/\s+/);
+  const lines = text.split('\n').filter(l=>l.trim());
+  const issues = [];
+  let score = 50;
+
+  // Length check
+  if(words.length < 100){issues.push({type:'fix',msg:'Resume is too short. Aim for 300-600 words for most roles.'}); score -= 10;}
+  else if(words.length > 800){issues.push({type:'warn',msg:'Resume may be too long. Keep it under 2 pages (600 words) unless executive level.'}); score -= 5;}
+  else{issues.push({type:'ok',msg:`Good length: ${words.length} words`}); score += 5;}
+
+  // Contact info
+  const hasEmail = /[\w.-]+@[\w.-]+\.\w+/.test(text);
+  const hasPhone = /[\d()\-+\s]{10,}/.test(text);
+  if(!hasEmail){issues.push({type:'fix',msg:'No email address detected. Add professional email.'}); score -= 8;}
+  else{score += 5;}
+  if(!hasPhone){issues.push({type:'warn',msg:'No phone number detected. Consider adding one.'}); score -= 3;}
+  else{score += 3;}
+
+  // LinkedIn
+  if(/linkedin/i.test(text)){issues.push({type:'ok',msg:'LinkedIn profile included \u2014 great for credibility'}); score += 5;}
+  else{issues.push({type:'warn',msg:'Add your LinkedIn URL. 87% of recruiters check LinkedIn.'}); score -= 3;}
+
+  // Sections detection
+  let hasSummary=false,hasExp=false,hasEdu=false,hasSkills=false;
+  for(const l of lines){
+    const ll=l.toLowerCase().trim();
+    if(SECTION_KEYWORDS.summary.some(k=>ll.includes(k)))hasSummary=true;
+    if(SECTION_KEYWORDS.experience.some(k=>ll.includes(k)))hasExp=true;
+    if(SECTION_KEYWORDS.education.some(k=>ll.includes(k)))hasEdu=true;
+    if(SECTION_KEYWORDS.skills.some(k=>ll.includes(k)))hasSkills=true;
+  }
+  if(!hasSummary){issues.push({type:'fix',msg:'Missing Professional Summary. This is the first thing recruiters read.'}); score -= 8;}
+  else{score += 5;}
+  if(!hasExp){issues.push({type:'warn',msg:'Experience section not clearly labeled.'}); score -= 5;}
+  else{score += 5;}
+  if(!hasSkills){issues.push({type:'fix',msg:'Missing dedicated Skills section. ATS systems scan for this.'}); score -= 8;}
+  else{score += 5;}
+
+  // Weak verbs
+  let weakCount=0;
+  WEAK_VERBS.forEach(v=>{
+    const regex=new RegExp('\\b'+v+'\\b','gi');
+    const matches=lower.match(regex);
+    if(matches)weakCount+=matches.length;
+  });
+  if(weakCount>3){issues.push({type:'fix',msg:`Found ${weakCount} weak verbs ("helped", "worked on", etc.). Replace with action verbs like "${STRONG_VERBS.slice(0,4).join('", "')}".`}); score -= weakCount*2;}
+  else if(weakCount>0){issues.push({type:'warn',msg:`${weakCount} weak verb(s) found. Consider replacing with stronger action verbs.`}); score -= weakCount;}
+  else{issues.push({type:'ok',msg:'Strong action verbs throughout \u2014 well done'}); score += 5;}
+
+  // Quantified achievements
+  const numbers = text.match(/\d+[%$KkMm]|\$[\d,]+|\d+\+?\s*(years|clients|projects|team|people|users|revenue|sales)/gi)||[];
+  if(numbers.length>=3){issues.push({type:'ok',msg:`${numbers.length} quantified achievements found. Numbers make resumes 40% more compelling.`}); score += 8;}
+  else if(numbers.length>0){issues.push({type:'warn',msg:`Only ${numbers.length} quantified result(s). Add more numbers: revenue, team size, percentages, users served.`}); score += 2;}
+  else{issues.push({type:'fix',msg:'No quantified achievements. Add metrics: "Increased sales by 30%", "Managed team of 8", "Reduced costs by $50K".'}); score -= 10;}
+
+  // Power words
+  let powerCount=0;
+  POWER_WORDS.forEach(w=>{if(lower.includes(w))powerCount++});
+  if(powerCount>=5){score+=5;}
+  else{issues.push({type:'warn',msg:'Add business impact keywords: revenue, growth, ROI, strategy, analytics, efficiency.'}); score-=3;}
+
+  // AI/tech keywords
+  const aiKeywords = ['ai','artificial intelligence','machine learning','chatgpt','automation','data analysis','python','sql','tableau','power bi','analytics'];
+  let aiCount=0;
+  aiKeywords.forEach(k=>{if(lower.includes(k))aiCount++});
+  if(aiCount===0){issues.push({type:'fix',msg:'No AI or modern tech skills detected. In 2026, this is a red flag for most employers. Unlock Pro for specific recommendations.'}); score-=8;}
+  else if(aiCount<3){issues.push({type:'warn',msg:`${aiCount} AI/tech keyword(s) found. Consider adding more to stay competitive.`}); score-=2;}
+  else{issues.push({type:'ok',msg:`${aiCount} AI/tech keywords found \u2014 you\'re positioned well`}); score+=5;}
+
+  // Buzzword check
+  const buzzwords = ['synergy','leverage','paradigm','proactive','dynamic','self-starter','go-getter','think outside the box','results-driven','detail-oriented'];
+  let buzzCount=0;
+  buzzwords.forEach(b=>{if(lower.includes(b))buzzCount++});
+  if(buzzCount>=3){issues.push({type:'fix',msg:`${buzzCount} clich\u00e9 buzzwords detected. Replace "results-driven self-starter" with actual results.`}); score-=buzzCount*2;}
+  else if(buzzCount>0){issues.push({type:'warn',msg:`${buzzCount} buzzword(s) found. Show, don't tell \u2014 replace with specific achievements.`}); score-=buzzCount;}
+
+  score = Math.max(15, Math.min(98, score));
+  return {score, issues, weakCount, aiCount, hasEmail, hasPhone, hasSummary, hasExp, hasEdu, hasSkills, wordCount:words.length};
+}
+
+/* ═══════════════════════════════════════
+   RENDER SCORE
+   ═══════════════════════════════════════ */
+function renderScore(r){
+  const circ = 2*Math.PI*40;
+  const ring = document.getElementById('scoreRing');
+  const pct = r.score/100;
+  ring.style.strokeDasharray = circ;
+  setTimeout(()=>{ring.style.strokeDashoffset = circ*(1-pct)},100);
+
+  const cls = r.score>=75?'good':r.score>=50?'mid':'low';
+  ring.className = 'prg '+cls;
+
+  document.getElementById('scoreVal').textContent = r.score;
+
+  const grade = document.getElementById('gradeText');
+  const desc = document.getElementById('gradeDesc');
+  if(r.score>=85){grade.textContent='Excellent';desc.textContent='Minor tweaks and you\'re golden';}
+  else if(r.score>=70){grade.textContent='Good';desc.textContent='A few fixes will make it stand out';}
+  else if(r.score>=50){grade.textContent='Needs Work';desc.textContent='Several areas to improve';}
+  else{grade.textContent='Major Rewrite';desc.textContent='Let\'s rebuild this properly';}
+  grade.className='grade '+cls;
+
+  const list = document.getElementById('issuesList');
+  const icons = {fix:'\u2716',warn:'\u26A0',ok:'\u2714'};
+  list.innerHTML = r.issues.map(i=>`<div class="issue ${i.type}"><span class="ico">${icons[i.type]}</span><span>${i.msg}</span></div>`).join('');
+}
+
+/* ═══════════════════════════════════════
+   OPTIMIZED RESUME OUTPUT
+   ═══════════════════════════════════════ */
+function renderOptimized(raw, result){
+  const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
+  const target = document.getElementById('targetRole').value.trim();
+  const level = document.getElementById('expLevel').value;
+
+  // Extract name (first non-empty line)
+  let name = lines[0]||'Your Name';
+  if(name.length>60) name = name.substring(0,60);
+  document.getElementById('rName').textContent = name;
+
+  // Extract email/phone for meta
+  const emailMatch = raw.match(/[\w.-]+@[\w.-]+\.\w+/);
+  const phoneMatch = raw.match(/[\d()\-+.\s]{10,}/);
+  let meta = [];
+  if(emailMatch) meta.push(emailMatch[0]);
+  if(phoneMatch) meta.push(phoneMatch[0].trim());
+  if(target) meta.push(target);
+  document.getElementById('rMeta').textContent = meta.join(' \u2022 ');
+
+  // Build optimized sections
+  const sections = [];
+
+  // Summary
+  const summaryLevels = {
+    entry:`Motivated professional seeking to leverage skills in ${target||'a dynamic environment'}. Quick learner with strong foundations and a commitment to delivering measurable results.`,
+    mid:`Results-oriented professional with 3-7 years of progressive experience${target?' in '+target:''}. Proven track record of driving efficiency, leading cross-functional initiatives, and delivering quantifiable business impact.`,
+    senior:`Senior leader with 8+ years of expertise${target?' in '+target:''}. Track record of building high-performing teams, driving strategic initiatives, and delivering multi-million dollar business outcomes.`,
+    exec:`Executive with extensive experience driving organizational transformation${target?' across '+target+' functions':''}. Known for strategic vision, P&L ownership, and building cultures of innovation and accountability.`
+  };
+  sections.push({title:'Professional Summary',text:summaryLevels[level]});
+
+  // Rewrite experience with strong verbs
+  let expText = '';
+  const expLines = [];
+  let inExp = false;
+  for(const l of lines){
+    const ll = l.toLowerCase();
+    if(SECTION_KEYWORDS.experience.some(k=>ll.includes(k))){inExp=true;continue;}
+    if(inExp && (SECTION_KEYWORDS.education.some(k=>ll.includes(k))||SECTION_KEYWORDS.skills.some(k=>ll.includes(k)))){inExp=false;}
+    if(inExp && l.length>10) expLines.push(l);
+  }
+
+  if(expLines.length>0){
+    expText = expLines.map(l=>{
+      let optimized = l;
+      WEAK_VERBS.forEach((v,i)=>{
+        const regex = new RegExp('\\b'+v+'\\b','gi');
+        if(regex.test(optimized)){
+          optimized = optimized.replace(regex, '<strong>'+STRONG_VERBS[i%STRONG_VERBS.length]+'</strong>');
+        }
+      });
+      return optimized;
+    }).join('\n');
+  } else {
+    expText = '(Paste your full experience section for AI optimization)';
+  }
+  sections.push({title:'Experience',text:expText});
+
+  // Skills — enhance with what's in the resume + suggestions
+  const existingSkills = [];
+  let inSkills = false;
+  for(const l of lines){
+    const ll=l.toLowerCase();
+    if(SECTION_KEYWORDS.skills.some(k=>ll.includes(k))){inSkills=true;continue;}
+    if(inSkills && l.length>2){existingSkills.push(l);if(existingSkills.length>6)break;}
+    if(inSkills && (SECTION_KEYWORDS.experience.some(k=>ll.includes(k))||SECTION_KEYWORDS.education.some(k=>ll.includes(k))))inSkills=false;
+  }
+  let skillsText = existingSkills.length>0 ? existingSkills.join('\n') : 'Project Management \u2022 Data Analysis \u2022 Strategic Planning';
+  if(result.aiCount<2) skillsText += '\n<strong>AI & Modern Tools:</strong> ChatGPT/AI Workflows \u2022 Data Analytics \u2022 Automation Tools';
+  sections.push({title:'Core Skills',text:skillsText});
+
+  // Education
+  const eduLines=[];
+  let inEdu=false;
+  for(const l of lines){
+    const ll=l.toLowerCase();
+    if(SECTION_KEYWORDS.education.some(k=>ll.includes(k))){inEdu=true;continue;}
+    if(inEdu && l.length>5)eduLines.push(l);
+    if(inEdu && eduLines.length>4)break;
+  }
+  if(eduLines.length>0) sections.push({title:'Education',text:eduLines.join('\n')});
+
+  document.getElementById('resumeSections').innerHTML = sections.map(s=>
+    `<div class="resume-section"><div class="stitle">${s.title}</div><div class="stext">${s.text}</div></div>`
+  ).join('');
+}
+
+/* ═══════════════════════════════════════
+   PRO: AI SKILLS RECOMMENDATIONS
+   ═══════════════════════════════════════ */
+const AI_SKILLS = [
+  {icon:'\uD83E\uDD16',name:'AI Prompt Engineering',demand:'hot',label:'HOT',
+   desc:'The #1 most in-demand new skill of 2025-2026. Companies are hiring dedicated prompt engineers at $80-150K. Even non-tech roles need this.',
+   line:'Proficient in AI prompt engineering across ChatGPT, Claude, and Gemini for content generation, data analysis, and workflow automation'},
+  {icon:'\uD83D\uDCC8',name:'Data Analytics + AI',demand:'hot',label:'HOT',
+   desc:'Every company wants people who can pull insights from data using modern tools. SQL + Python + AI visualization is a killer combo.',
+   line:'Experienced in data-driven decision making using SQL, Python, Tableau, and AI-assisted analytics to deliver actionable business insights'},
+  {icon:'\u2699\uFE0F',name:'AI Workflow Automation',demand:'high',label:'HIGH',
+   desc:'Automate repetitive business processes with Zapier, Make, and AI agents. Companies pay $50-200/hr for this skill.',
+   line:'Designed and implemented AI-powered automation workflows using Zapier, Make, and custom API integrations, reducing manual processes by 60%+'},
+  {icon:'\uD83C\uDFA8',name:'AI Content & Design',demand:'high',label:'HIGH',
+   desc:'Using Midjourney, DALL-E, Canva AI, and AI writing tools to produce professional content 10x faster.',
+   line:'Leveraged AI content generation tools (Midjourney, Canva AI, Claude) to produce marketing collateral, reducing design turnaround from days to hours'},
+  {icon:'\uD83D\uDD12',name:'AI Ethics & Governance',demand:'rising',label:'RISING',
+   desc:'As AI adoption explodes, companies need people who understand responsible AI use, bias detection, and compliance frameworks.',
+   line:'Knowledgeable in AI governance frameworks, responsible AI practices, and data privacy compliance (GDPR, SOC 2) for enterprise AI deployment'},
+];
+
+function renderProSkills(result){
+  const el = document.getElementById('proContent');
+  el.innerHTML = `
+    <div class="cl">AI Skills to Add to Your Resume</div>
+    <p style="font-size:.86rem;color:var(--t2);margin-bottom:4px;font-weight:600;color:var(--red)">
+      \u26A0 ${result.aiCount<2?'Your resume has almost no AI skills.':'You have some AI skills, but here\'s how to level up.'} In 2026, this is the #1 reason resumes get filtered out.
+    </p>
+    <p style="font-size:.82rem;color:var(--t2);margin-bottom:16px;line-height:1.55">
+      Add these 5 skills to immediately stand out. Each includes an exact line you can copy into your resume.
+    </p>
+    ${AI_SKILLS.map(s=>`
+      <div class="skill-card">
+        <div class="sk-head">
+          <span class="sk-icon">${s.icon}</span>
+          <span class="sk-name">${s.name}</span>
+          <span class="sk-demand ${s.demand}">${s.label}</span>
+        </div>
+        <div class="sk-desc">${s.desc}</div>
+        <div class="sk-line">\u201C${s.line}\u201D</div>
+        <button class="btn btn-ghost" style="margin-top:8px;padding:6px 14px;font-size:.75rem;width:100%" onclick="copyLine(this, '${s.line.replace(/'/g,"\\'")}')">&#128203; Copy Resume Line</button>
+      </div>
+    `).join('')}
+    <div class="futurelink">More learning tools coming soon from AnchorWithin \u2192</div>
+  `;
+}
+
+function copyLine(btn, text){
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.innerHTML='\u2714 Copied!';
+    setTimeout(()=>btn.innerHTML='&#128203; Copy Resume Line',2000);
+  });
+}
+
+/* ═══════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════ */
+function copyResume(){
+  const el = document.getElementById('resumeOut');
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(()=>alert('Resume text copied to clipboard!'));
+}
+
+function printResume(){
+  const content = document.getElementById('resumeOut').innerHTML;
+  const win = window.open('','','width=800,height=1000');
+  win.document.write(`<html><head><title>Resume</title><style>
+    body{font-family:Georgia,serif;max-width:700px;margin:40px auto;color:#222;line-height:1.6}
+    .resume-header{border-bottom:2px solid #222;padding-bottom:12px;margin-bottom:16px}
+    .rname{font-size:24px;font-weight:bold}.rmeta{font-size:13px;color:#666;margin-top:4px}
+    .resume-section{margin-bottom:16px}.stitle{font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#444;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px}
+    .stext{font-size:14px;white-space:pre-wrap}.resume-actions{display:none}
+  </style></head><body>${content}</body></html>`);
+  win.document.close();
+  win.print();
+}
+
+/* ═══════════════════════════════════════
+   PREMIUM
+   ═══════════════════════════════════════ */
+function unlockPro(){
+  const ok=confirm('Resume Pro + AI Skills Advisor \u2014 $4.99\n\n\u2192 5 AI skills with copy-paste resume lines\n\u2192 Demand ratings and learning paths\n\u2192 All future AnchorWithin career tools included\n\nOK to simulate (wire Stripe/Gumroad for production).');
+  if(!ok)return;
+  try{localStorage.setItem('aw_resume_pro','1')}catch(e){}
+  document.getElementById('proGate').classList.add('open');
+}
+(function(){
+  if(new URLSearchParams(location.search).get('paid'))try{localStorage.setItem('aw_resume_pro','1')}catch(e){}
+  try{if(localStorage.getItem('aw_resume_pro'))document.getElementById('proGate').classList.add('open')}catch(e){}
+})();
+</script>
+</body>
+</html>
