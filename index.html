@@ -577,8 +577,8 @@ function printResume(){
    PREMIUM
    ═══════════════════════════════════════ */
 function unlockPro(){
-  const ok=confirm('Resume Pro + AI Skills Advisor \u2014 $4.99\n\n\u2192 5 AI skills with copy-paste resume lines\n\u2192 Demand ratings and learning paths\n\u2192 All future AnchorWithin career tools included\n\nOK to simulate (wire Stripe/Gumroad for production).');
-  if(!ok)return;
+  window.location.href = 'https://buy.stripe.com/dRm4gAfdI22b6sffj467S0b';
+  return;
   try{localStorage.setItem('aw_resume_pro','1')}catch(e){}
   document.getElementById('proGate').classList.add('open');
 }
